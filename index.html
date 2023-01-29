@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Simple Chat App</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+      integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+      integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
+      integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <!-- Bootstrap nav -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-5">
+      <a class="navbar-brand" href="/">Chat Application</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/logout">Logout</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <span id="alert"></span>
+    <ul id="messages"></ul>
+    <form id="form" action="">
+      <input id="input" autocomplete="off" placeholder="Your message" /><button
+        class="btn-send"
+      >
+        Send
+      </button>
+    </form>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+      crossorigin="anonymous"
+    ></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      let username = null;
+      document.cookie.split("; ").map((item) => {
+        if (item.split("=")[0] == "username") {
+          username = item.split("=")[1];
+        }
+      });
+      var socket = io({ auth: { token: username } });
+      var btnSend = document.querySelector(".btn-send");
+      var input = document.getElementById("input");
+      var messages = document.getElementById("messages");
+      const alert = document.getElementById("alert");
+
+      function displayMsg(msg, user, uname) {
+        var ele = `<li class="${
+          user === "me" ? "msg-right" : "msg-left"
+        }"><span>${user === "me" ? "You" : uname}</span>${msg}</li>`;
+        messages.insertAdjacentHTML("beforeend", ele);
+        window.scrollTo(0, document.body.scrollHeight);
+      }
+      btnSend.addEventListener("click", function (e) {
+        e.preventDefault();
+        if (input.value) {
+          socket.emit("send message", input.value);
+          displayMsg(input.value, "me", null);
+          input.value = "";
+        }
+      });
+      socket.on("connect_error", (error) => {
+        alert.style.backgroundColor = "rgb(255, 97, 97)";
+        alert.textContent = ` Error: ${error}`;
+      });
+      socket.on("chat message", function (prop) {
+        displayMsg(prop.msg, "notme", prop.username);
+      });
+
+      socket.on("user joined", function (user) {
+        if (socket.auth.token !== user) {
+          alert.style.backgroundColor = "rgb(167, 167, 255)";
+          alert.textContent = ` User: ${user} joined`;
+        }
+      });
+
+      socket.on("user left", function (user) {
+        if (socket.auth.token !== user) {
+          alert.style.backgroundColor = "rgb(255, 97, 97)";
+          alert.textContent = ` User: ${user} left`;
+        }
+      });
+    </script>
+  </body>
+</html>
