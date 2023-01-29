@@ -19,7 +19,7 @@ const fs = require("fs");
 // });
 
 // db.close();
-app.use(bodyParser.urlencoded());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(cookieParser());
 
