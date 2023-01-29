@@ -1,5 +1,4 @@
 // Express Server
-const bodyParser = require("body-parser");
 const express = require("express");
 const app = express();
 // Socket.io
@@ -19,7 +18,7 @@ const fs = require("fs");
 // });
 
 // db.close();
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(cookieParser());
 
