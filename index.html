@@ -53,7 +53,9 @@
     </nav>
 
     <span id="alert"></span>
-    <ul id="messages"></ul>
+    <ul id="messages">
+      <!--messages-->
+    </ul>
     <form id="form" action="">
       <input id="input" autocomplete="off" placeholder="Your message" /><button
         class="btn-send"
@@ -83,7 +85,9 @@
       function displayMsg(msg, user, uname) {
         var ele = `<li class="${
           user === "me" ? "msg-right" : "msg-left"
-        }"><span>${user === "me" ? "You" : uname}</span>${msg}</li>`;
+        }"><span>${
+          user === "me" ? "You" : uname
+        }</span>${msg}<span class="msg-timestamp">${new Date().toLocaleTimeString()}</span></li>`;
         messages.insertAdjacentHTML("beforeend", ele);
         window.scrollTo(0, document.body.scrollHeight);
       }

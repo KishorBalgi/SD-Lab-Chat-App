@@ -52,7 +52,7 @@ body {
   color: #fff;
 }
 #form > button:hover {
-  background: blue;
+  background: #34b7f1;
 }
 #messages {
   list-style-type: none;
@@ -61,7 +61,7 @@ body {
   display: flex;
   flex-direction: column;
 }
-#messages > li {
+#messages li {
   display: flex;
   flex-direction: column;
   width: 70%;
@@ -70,15 +70,26 @@ body {
   border-radius: 10px;
   font-size: 20px;
 }
-#messages > li > span {
-  font-size: 13px;
+#messages li {
+  font-size: 18px;
   color: #ffffff;
+}
+#messages li span {
+  font-size: 16px;
+  color: #000;
 }
 .msg-left {
   align-self: flex-start;
-  background-color: #5757ff;
+  background-color: #128c7e;
+  border-radius: 15px 15px 15px 0 !important;
 }
 .msg-right {
   align-self: flex-end;
-  background: #a436ff;
+  background: #25d366;
+  border-radius: 15px 15px 0 15px !important;
+}
+.msg-timestamp {
+  font-size: 4px;
+  color: #000;
+  align-self: flex-end;
 }

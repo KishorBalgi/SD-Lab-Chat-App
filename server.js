@@ -15,6 +15,8 @@ const fs = require("fs");
 
 // db.serialize(() => {
 // db.run("CREATE TABLE Users (username TEXT, password TEXT)");
+// db.run("CREATE TABLE Messages (username TEXT, message TEXT,timestamp TEXT)");
+// db.run("ALTER TABLE Messages ADD COLUMN timestamp TEXT");
 // });
 
 // db.close();
@@ -115,7 +117,57 @@ app.get("/logout", (req, res) => {
 // Home:
 app.get("/", (req, res) => {
   if (req.cookies.logged) {
-    res.sendFile(__dirname + "/index.html");
+    const username = req.cookies.username;
+    // Get messages from database
+    db.all("SELECT * FROM Messages", (err, rows) => {
+      if (err) {
+        console.log(err);
+      } else {
+        let messages = "";
+        rows.forEach((row) => {
+          messages += `<li class="${
+            row.username === username ? "msg-right" : "msg-left"
+          }"><span>${
+            row.username === username ? "You" : row.username.replace("%20", " ")
+          }</span>${row.message}<span class="msg-timestamp">${
+            row.timestamp
+          }</span></li>`;
+        });
+        const index = fs.readFileSync(__dirname + "/index.html", "utf-8");
+        const indexWithMessages = index.replace("<!--messages-->", messages);
+        res.status(200).send(indexWithMessages);
+      }
+    });
+  } else {
+    res.redirect("/login");
+  }
+});
+
+// Clear Messages:
+app.get("/clear", (req, res) => {
+  if (req.cookies.logged) {
+    db.run("DELETE FROM Messages", (err) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.redirect("/");
+      }
+    });
+  } else {
+    res.redirect("/login");
+  }
+});
+
+// Clear Users:
+app.get("/clearusers", (req, res) => {
+  if (req.cookies.logged) {
+    db.run("DELETE FROM Users", (err) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.redirect("/");
+      }
+    });
   } else {
     res.redirect("/login");
   }
@@ -138,6 +190,16 @@ io.on("connection", (socket) => {
   io.emit("user joined", socket.username);
   //   Send Chat:
   socket.on("send message", (msg) => {
+    // Save message to database
+    db.run(
+      "INSERT INTO Messages VALUES (?, ?, ?)",
+      [socket.username, msg, new Date().toLocaleTimeString()],
+      (err) => {
+        if (err) {
+          console.log(err);
+        }
+      }
+    );
     socket
       .to("public")
       .emit("chat message", { msg, username: socket.username });
